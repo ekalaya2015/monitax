@@ -1,0 +1,30 @@
+version: '3.4'
+
+services:
+  monitax:
+    image: monitax
+    container_name: monitax
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 8008:8008
+
+  database:
+    image: postgres:latest
+    container_name: ${DEFAULT_DATABASE_HOSTNAME}
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=${DEFAULT_DATABASE_USER}
+      - POSTGRES_PASSWORD=${DEFAULT_DATABASE_PASSWORD}
+      - POSTGRES_DB=${DEFAULT_DATABASE_DB}
+    volumes: 
+      - db:/var/lib/postgresql/data
+
+volumes:
+  db:
+    driver: local
+  cache:
+    driver: local
+
