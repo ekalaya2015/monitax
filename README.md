@@ -10,6 +10,18 @@ Dibangun menggunakan framework FastAPI  dan SQLModel
 - [ ] Role dan permission
 - [ ] Dashboard
 
-Dari direktori root project, jalankan perintah berikut:
-``` 
-uvicorn app.main:app--reload --port 8008
+# How to
+- Clone this repository
+
+- Dari direktori root project, jalankan perintah berikut:
+```
+$ pip install -r requirements.txt
+```
+Lebih baik dijalankan dalam sebuah virtual environment (python 3.10+)
+
+Untuk migrasi menggunakan alembic (Postgresql database), jalankan perintah berikut di terminal
+```
+$ alembic upgrade head
+```
+
+
