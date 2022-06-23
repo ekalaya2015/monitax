@@ -10,6 +10,6 @@ Dibangun menggunakan framework FastAPI  dan SQLModel
 - [ ] Role dan permission
 - [ ] Dashboard
 
-Dari directori root project, jalankan perintah berikut:
+Dari direktori root project, jalankan perintah berikut:
 ``` 
 uvicorn app.main:app--reload --port 8008
