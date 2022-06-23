@@ -1,2 +1,3 @@
 # monitax
-Backend untuk Aplikasi Monitoring Pajak
+Backend untuk aplikasi monitoring pajak online
+Dibangun menggunakan framework FastAPI dan SQLModel
