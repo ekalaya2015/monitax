@@ -4,15 +4,11 @@ Backend untuk aplikasi monitoring pajak online
 Dibangun menggunakan framework FastAPI  dan SQLModel
 
 # TODO:
-[x] User management
-
-[x] Device management
-
-[x] Task worker (Celery)
-
-[ ] Role dan permission
-
-[ ] Dashboard
+- [x] User management
+- [x] Device management
+- [x] Task worker (Celery)
+- [ ] Role dan permission
+- [ ] Dashboard
 
 Dari directori root project, jalankan perintah berikut:
 ``` 
