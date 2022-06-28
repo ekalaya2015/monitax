@@ -54,7 +54,7 @@ async def read_current_user(
         )
 
 
-@router.patch("/profile", response_model=UserResponse)
+@router.patch("/me/profile", response_model=UserResponse)
 async def update_profile(
     user_request: UserUpdateProfileRequest,
     current_user: User = Depends(deps.get_current_user),
@@ -140,7 +140,7 @@ async def delete_user_by_id(
         )
 
 
-@router.post("/reset-password", response_model=BaseUserResponse)
+@router.post("/me/reset-password", response_model=BaseUserResponse)
 async def reset_current_user_password(
     user_update_password: UserUpdatePasswordRequest,
     session: AsyncSession = Depends(deps.get_session),
