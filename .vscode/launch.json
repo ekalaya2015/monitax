@@ -10,10 +10,10 @@
             "request": "launch",
             "module": "uvicorn",
             "args": [
-                "app.main:app",
                 "--reload",
                 "--port",
-                "8008"
+                "8008",
+                "app.main:app",
             ],
             "jinja": true,
             "justMyCode": true

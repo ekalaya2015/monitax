@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Optional, Dict, Any
 
 import toml
 from pydantic import AnyHttpUrl, BaseSettings, EmailStr, PostgresDsn, validator
@@ -7,9 +7,11 @@ from pydantic import AnyHttpUrl, BaseSettings, EmailStr, PostgresDsn, validator
 PROJECT_DIR = Path(__file__).parent.parent.parent
 PYPROJECT_CONTENT = toml.load(f"{PROJECT_DIR}/pyproject.toml")["tool"]["poetry"]
 
+
 class Settings(BaseSettings):
     # CORE SETTINGS
     TIMEZONE: str
+    SERVER_HOST: str = ""
     SECRET_KEY: str
     ENVIRONMENT: Literal["DEV", "PYTEST", "STG", "PRD"] = "DEV"
     SECURITY_BCRYPT_ROUNDS: int = 12
@@ -63,6 +65,32 @@ class Settings(BaseSettings):
             host=values["TEST_DATABASE_HOSTNAME"],
             port=values["TEST_DATABASE_PORT"],
             path=f"/{values['TEST_DATABASE_DB']}",
+        )
+
+    SMTP_TLS: bool = True
+    SMTP_PORT: Optional[int] = None
+    SMTP_HOST: Optional[str] = None
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    EMAILS_FROM_EMAIL: Optional[EmailStr] = None
+    EMAILS_FROM_NAME: Optional[str] = None
+
+    @validator("EMAILS_FROM_NAME")
+    def get_project_name(cls, v: Optional[str], values: Dict[str, Any]) -> str:
+        if not v:
+            return values["PROJECT_NAME"]
+        return v
+
+    EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
+    EMAIL_TEMPLATES_DIR: str = "/app/email-templates/build"
+    EMAILS_ENABLED: bool = False
+
+    @validator("EMAILS_ENABLED", pre=True)
+    def get_emails_enabled(cls, v: bool, values: Dict[str, Any]) -> bool:
+        return bool(
+            values.get("SMTP_HOST")
+            and values.get("SMTP_PORT")
+            and values.get("EMAILS_FROM_EMAIL")
         )
 
     class Config:

@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.endpoints import auth, devices, invoices, users
+from app.api.endpoints import auth, devices, invoices, users, tasks
 
 PREFIX = "/api/v1"
 api_router = APIRouter()
@@ -10,3 +10,4 @@ api_router.include_router(devices.router, prefix=PREFIX + "/devices", tags=["dev
 api_router.include_router(
     invoices.router, prefix=PREFIX + "/invoices", tags=["invoices"]
 )
+api_router.include_router(tasks.router, prefix=PREFIX + "/tasks", tags=["tasks"])

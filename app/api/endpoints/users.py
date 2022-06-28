@@ -3,8 +3,9 @@ import uuid
 from datetime import datetime
 from typing import List
 
+
 import pytz
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlmodel import delete, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -18,6 +19,7 @@ from app.schemas.requests import (
     UserUpdateProfileRequest,
 )
 from app.schemas.responses import BaseUserResponse, UserDeviceInResponse, UserResponse
+from app.core.utils import send_new_account_email
 
 router = APIRouter()
 timezone = pytz.timezone(settings.TIMEZONE)
@@ -180,6 +182,15 @@ async def register_new_user(
         )
         session.add(user)
         await session.commit()
+        if settings.EMAILS_ENABLED:
+            task = BackgroundTasks()
+            task.add_task(
+                send_new_account_email(
+                    email_to=new_user.username,
+                    username=new_user.username,
+                    password=new_user.password,
+                )
+            )
         return user
     except Exception as e:
         await session.rollback()
@@ -188,7 +199,7 @@ async def register_new_user(
 
 @router.get("/", response_model=List[BaseUserResponse])
 async def get_user_list(
-    current_user: User = Depends(deps.get_current_user),
+    # current_user: User = Depends(deps.get_current_user),
     session: AsyncSession = Depends(deps.get_session),
 ):
     """Get user list"""
