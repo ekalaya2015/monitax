@@ -35,7 +35,7 @@ async def login_access_token(
     if not security.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
 
-    return security.generate_access_token_response(str(user.id))
+    return security.generate_access_token_response(str(user.id),role=user.role,username=user.username)
 
 
 @router.post("/refresh-token", response_model=AccessTokenResponse)
@@ -77,4 +77,4 @@ async def refresh_token(
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    return security.generate_access_token_response(str(user.id))
+    return security.generate_access_token_response(str(user.username),role=user.role,username=user.username)

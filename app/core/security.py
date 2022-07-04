@@ -22,12 +22,14 @@ PWD_CONTEXT = CryptContext(
 
 class JWTTokenPayload(BaseModel):
     sub: str | int
+    role: str
+    username: str
     refresh: bool
     issued_at: int
     expires_at: int
 
 
-def create_jwt_token(subject: str | int, exp_secs: int, refresh: bool):
+def create_jwt_token(subject: str | int, role:str, username:str, exp_secs: int, refresh: bool):
     """Creates jwt access or refresh token for user.
 
     Args:
@@ -43,6 +45,8 @@ def create_jwt_token(subject: str | int, exp_secs: int, refresh: bool):
         "issued_at": issued_at,
         "expires_at": expires_at,
         "sub": subject,
+        "role":role,
+        "username": username,
         "refresh": refresh,
     }
     encoded_jwt = jwt.encode(
@@ -53,13 +57,13 @@ def create_jwt_token(subject: str | int, exp_secs: int, refresh: bool):
     return encoded_jwt, expires_at, issued_at
 
 
-def generate_access_token_response(subject: str | int):
+def generate_access_token_response(subject: str | int,role:str,username:str):
     """Generate tokens and return AccessTokenResponse"""
     access_token, expires_at, issued_at = create_jwt_token(
-        subject, ACCESS_TOKEN_EXPIRE_SECS, refresh=False
+        subject, role, username,ACCESS_TOKEN_EXPIRE_SECS, refresh=False
     )
     refresh_token, refresh_expires_at, refresh_issued_at = create_jwt_token(
-        subject, REFRESH_TOKEN_EXPIRE_SECS, refresh=True
+        subject, role, username,REFRESH_TOKEN_EXPIRE_SECS, refresh=True
     )
     return AccessTokenResponse(
         token_type="Bearer",

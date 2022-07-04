@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     TIMEZONE: str
     SERVER_HOST: str = ""
     SECRET_KEY: str
+    API_PREFIX: str="/api/v1"
     ENVIRONMENT: Literal["DEV", "PYTEST", "STG", "PRD"] = "DEV"
     SECURITY_BCRYPT_ROUNDS: int = 12
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 11520  # 8 days
