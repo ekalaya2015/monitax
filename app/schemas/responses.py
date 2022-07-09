@@ -12,8 +12,8 @@ class BaseResponse(BaseModel):
 class AccessTokenResponse(BaseResponse):
     token_type: str
     access_token: str
-    expires_at: int
-    issued_at: int
+    exp: int
+    iat: int
     refresh_token: str
     refresh_token_expires_at: int
     refresh_token_issued_at: int
@@ -26,6 +26,7 @@ class UserResponse(BaseResponse):
     first_name: Optional[str]
     last_name: Optional[str]
     address: Optional[str]
+    phone_no: Optional[str]
     role: Role
 
 

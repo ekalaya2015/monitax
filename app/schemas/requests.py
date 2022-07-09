@@ -21,6 +21,7 @@ class UserUpdateProfileRequest(BaseRequest):
     first_name: Optional[str]
     last_name: Optional[str]
     address: Optional[str]
+    phone_no:Optional[str]
 
 
 class UserCreateRequest(BaseRequest):
@@ -38,8 +39,8 @@ class DeviceCreateRequest(BaseRequest):
 class DeviceAssignRequest(BaseRequest):
     lat: float
     lon: float
-    serial_num: str
-    description: Optional[str]
+    # serial_num: str
+    # description: Optional[str]
 
 
 class InvoiceBaseRequest(BaseRequest):

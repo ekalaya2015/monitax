@@ -43,6 +43,7 @@ async def read_current_user(
             first_name=current_user.first_name,
             last_name=current_user.last_name,
             address=current_user.address,
+            phone_no=current_user.phone_no,
             role=current_user.role,
             devices=devices,
         )
@@ -98,6 +99,7 @@ async def get_user_by_id(
             first_name=user.first_name,
             last_name=user.last_name,
             address=user.address,
+            phone_no=user.phone_no,
             role=user.role,
             devices=devices,
         )

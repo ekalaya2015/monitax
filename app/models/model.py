@@ -37,6 +37,7 @@ class User(SQLModel, table=True):
     first_name: Optional[str]
     last_name: Optional[str]
     address: Optional[str]
+    phone_no: Optional[str]
     role: Role = Field(sa_column=Column(Enum(Role)))
     created_at: datetime.datetime = Field(
         sa_column=Column("created_at", DateTime(timezone=True)), nullable=False

@@ -23,10 +23,10 @@ PWD_CONTEXT = CryptContext(
 class JWTTokenPayload(BaseModel):
     sub: str | int
     role: str
-    username: str
+    name: str
     refresh: bool
-    issued_at: int
-    expires_at: int
+    iat: int
+    exp: int
 
 
 def create_jwt_token(subject: str | int, role:str, username:str, exp_secs: int, refresh: bool):
@@ -42,11 +42,11 @@ def create_jwt_token(subject: str | int, role:str, username:str, exp_secs: int, 
     expires_at = issued_at + exp_secs
 
     to_encode: dict[str, int | str | bool] = {
-        "issued_at": issued_at,
-        "expires_at": expires_at,
+        "iat": issued_at,
+        "exp": expires_at,
         "sub": subject,
         "role":role,
-        "username": username,
+        "name": username,
         "refresh": refresh,
     }
     encoded_jwt = jwt.encode(
@@ -68,8 +68,8 @@ def generate_access_token_response(subject: str | int,role:str,username:str):
     return AccessTokenResponse(
         token_type="Bearer",
         access_token=access_token,
-        expires_at=expires_at,
-        issued_at=issued_at,
+        exp=expires_at,
+        iat=issued_at,
         refresh_token=refresh_token,
         refresh_token_expires_at=refresh_expires_at,
         refresh_token_issued_at=refresh_issued_at,
