@@ -6,7 +6,7 @@ import pytz
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import delete, select
 from sqlmodel.ext.asyncio.session import AsyncSession
-
+from app.models.model import Role
 from app.api import deps
 from app.core.config import settings
 from app.models.model import Device, Invoice, Status, User
@@ -30,6 +30,10 @@ async def get_device_list(
     offset: Optional[int] = 0,
 ):
     """Get device list of current user"""
+    if current_user.role is not Role.admin:
+        raise HTTPException(status_code=401,detail="Not permissible for this role")
+
+
     if status:
         result = await session.exec(
             select(
@@ -89,6 +93,9 @@ async def add_device(
 
     When create/add device, status will be set to Inactive
     """
+    if current_user.role is not Role.admin:
+        raise HTTPException(status_code=401,detail="Not permissible for this role")
+
     result = await session.exec(select(Device).where(Device.name == new_device.name))
     if result.first():
         raise HTTPException(
@@ -133,6 +140,9 @@ async def assign_device_to_user(
     * Attribute 'lat' is latitude coordinate (mandatory)
     * Attribute 'lon' is longitude coordinate (mandatory)
     """
+    if current_user.role is not Role.admin:
+        raise HTTPException(status_code=401,detail="Not permissible for this role")
+
     result = await session.exec(select(Device).where(Device.id == device_id))
     device = result.one_or_none()
     if device is None:
@@ -182,6 +192,8 @@ async def unassign_device_from_user(
     When device is unassigned from a user, status will be set to Inactive
 
     """
+    if current_user.role is not Role.admin:
+        raise HTTPException(status_code=401,detail="Not permissible for this role")
 
     result = await session.exec(select(Device).where(Device.id == device_id))
     device = result.one_or_none()
@@ -222,6 +234,9 @@ async def update_devices_profile(
     Prerequistes:
     1. Update can be applied to device with any statuses except Inactive
     """
+    if current_user.role is not Role.admin:
+        raise HTTPException(status_code=401,detail="Not permissible for this role")
+
     result = await session.exec(select(Device).where(Device.id == device_id))
     device = result.one_or_none()
     if device is None:
@@ -257,6 +272,9 @@ async def delete_device(
     2. Device does not have any user assigned
     3. Device does not have any invoices
     """
+    if current_user.role is not Role.admin:
+        raise HTTPException(status_code=401,detail="Not permissible for this role")
+
     result = await session.exec(select(Device).where(Device.id == id))
     device = result.one_or_none()
     if device is None:

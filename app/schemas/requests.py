@@ -17,7 +17,7 @@ class UserUpdatePasswordRequest(BaseRequest):
 
 
 class UserUpdateProfileRequest(BaseRequest):
-    nik: str
+    nik: Optional[str]
     first_name: Optional[str]
     last_name: Optional[str]
     address: Optional[str]

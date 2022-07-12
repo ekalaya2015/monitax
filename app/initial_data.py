@@ -7,7 +7,8 @@ By defualt `main` create a superuser if not exists
 
 import asyncio
 from datetime import datetime
-
+import random
+import string
 from sqlalchemy import select
 
 from app.core import config, security
@@ -18,6 +19,7 @@ from app.models.model import Role, User
 
 
 async def main() -> None:
+    chars=string.digits
     print("Start initial data")
     async with SessionLocal() as session:
         result = await session.exec(
@@ -30,6 +32,7 @@ async def main() -> None:
                 hashed_password=security.get_password_hash(
                     config.settings.FIRST_SUPERUSER_PASSWORD
                 ),
+                nik=''.join(random.choice(chars) for i in range(16)),
                 role=Role.admin,
                 created_at=datetime.now(),
                 modified_at=datetime.now(),

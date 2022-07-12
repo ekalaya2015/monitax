@@ -34,10 +34,10 @@ class User(SQLModel, table=True):
     nik: Optional[str] = Field(
         sa_column=Column("nik", VARCHAR, unique=True), max_length=16
     )
-    first_name: Optional[str]
-    last_name: Optional[str]
-    address: Optional[str]
-    phone_no: Optional[str]
+    first_name: Optional[str]=''
+    last_name: Optional[str]=''
+    address: Optional[str]=''
+    phone_no: Optional[str]=''
     role: Role = Field(sa_column=Column(Enum(Role)))
     created_at: datetime.datetime = Field(
         sa_column=Column("created_at", DateTime(timezone=True)), nullable=False
@@ -54,10 +54,10 @@ class Device(SQLModel, table=True):
         sa_column=Column("name", VARCHAR, unique=True), primary_key=True
     )
     user_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
-    serial_num: Optional[str]
-    description: Optional[str]
-    lat: Optional[float]
-    lon: Optional[float]
+    serial_num: Optional[str]=''
+    description: Optional[str]=''
+    lat: Optional[float]=0.0
+    lon: Optional[float]=0.0
     status: Status = Field(sa_column=Column(Enum(Status)))
     created_at: datetime.datetime = Field(
         sa_column=Column("created_at", DateTime(timezone=True)), nullable=False

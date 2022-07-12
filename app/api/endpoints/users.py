@@ -1,14 +1,17 @@
 import json
 import uuid
+import random
+import string
 from datetime import datetime
 from typing import List
+from dotenv import unset_key
 
 
 import pytz
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlmodel import delete, select
 from sqlmodel.ext.asyncio.session import AsyncSession
-
+from app.models.model import Role
 from app.api import deps
 from app.core.config import settings
 from app.core.security import get_password_hash
@@ -63,7 +66,7 @@ async def update_profile(
 ):
     """Update current user profile"""
     try:
-        for k, v in user_request.dict().items():
+        for k, v in user_request.dict(exclude_unset=True).items():
             setattr(current_user, k, v)
         setattr(current_user, "modified_at", datetime.now(timezone))
         session.add(current_user)
@@ -84,7 +87,8 @@ async def get_user_by_id(
     session: AsyncSession = Depends(deps.get_session),
 ):
     """Get user detail by id"""
-
+    if current_user.role is not Role.admin:
+        raise HTTPException(status_code=401,detail="Not permissible for this role")
     result = await session.exec(select(User).where(User.id == id))
     user = result.one_or_none()
     if user is None:
@@ -122,6 +126,9 @@ async def delete_user_by_id(
     Prerequisites:
     1. User does not have device assigned
     """
+    if current_user.role is not Role.admin:
+        raise HTTPException(status_code=401,detail="Not permissible for this role")
+
     # check whether user has devices assigned
     result = await session.exec(select(User).where(User.id == id))
     user = result.one_or_none()
@@ -169,14 +176,19 @@ async def register_new_user(
     session: AsyncSession = Depends(deps.get_session),
 ):
     """Create new user"""
+    if current_user.role is not Role.admin:
+        raise HTTPException(status_code=401,detail="Not permissible for this role")
+
 
     result = await session.exec(select(User).where(User.username == new_user.username))
     user = result.one_or_none()
+    chars=string.digits
     if user is not None:
         raise HTTPException(status_code=400, detail="Cannot use this email address")
     try:
         user = User(
             username=new_user.username,
+            nik=''.join(random.choice(chars) for i in range(16)),
             hashed_password=get_password_hash(new_user.password),
             role=new_user.role,
             created_at=datetime.now(timezone),
