@@ -81,6 +81,15 @@ async def get_device_list(
         )
     return response  # devices
 
+@router.get('/me',response_model=List[DeviceCreatedResponse])
+async def get_devices_owned_by_current_user(
+    current_user:User=Depends(deps.get_current_user),
+    session:AsyncSession=Depends(deps.get_session),    
+):
+    """Get device list owned by current user"""
+    result = await session.exec(select(Device).where(Device.user_id==current_user.id))
+    devices = result.fetchall()
+    return [device for device in devices]
 
 @router.post("/", response_model=DeviceCreatedResponse)
 async def add_device(
@@ -164,8 +173,8 @@ async def assign_device_to_user(
         device.user_id = user.id
         device.lat = req.lat
         device.lon = req.lon
-        device.serial_num = req.serial_num
-        device.description = req.description
+        # device.serial_num = req.serial_num
+        # device.description = req.description
         device.status = Status.active
         device.modified_at = datetime.now(timezone)
         session.add(device)

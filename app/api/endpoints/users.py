@@ -65,6 +65,7 @@ async def update_profile(
     session: AsyncSession = Depends(deps.get_session),
 ):
     """Update current user profile"""
+    print(user_request)
     try:
         for k, v in user_request.dict(exclude_unset=True).items():
             setattr(current_user, k, v)

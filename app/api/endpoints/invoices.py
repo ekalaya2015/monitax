@@ -4,7 +4,7 @@ import pytz
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
-
+import random
 from app.api import deps
 from app.core.config import settings
 from app.models.model import Device, Invoice, User
@@ -65,3 +65,11 @@ async def submit_invoice(
         raise HTTPException(
             status_code=500, detail="Something went wrong. Contact your admin"
         )
+
+@router.get("/analytics")
+async def analytics():
+    """fake data"""
+    sales=float(round(random.random(),4)*1000000)
+    trx=int(round(random.random()*100))
+    tax=sales*11/100
+    return {"sales":sales,'trx':trx,'tax':tax}

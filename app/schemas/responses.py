@@ -46,8 +46,8 @@ class DeviceCreatedResponse(BaseResponse):
     name: str
     serial_num: str
     description: str
-    # lat: Optional[float]
-    # lon: Optional[float]
+    lat: Optional[float]
+    lon: Optional[float]
     status: Status
     # user_id:Optional[uuid.UUID]
 
