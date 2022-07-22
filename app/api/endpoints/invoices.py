@@ -74,14 +74,14 @@ async def get_daily_stats(
 ):
     """Get daily invoice statistics (sales, transactions) from current user"""
     result = await session.exec(
-        select(Invoice).where(Invoice.username == current_user.username)
+        select(Invoice.device_name,Invoice.invoice_num,Invoice.invoice_date,Invoice.total_value,Invoice.tax_value).where(Invoice.username == current_user.username)
     )
     data = result.fetchall()
-    invoices = DailyResponse(total=0, tax=0, count=0, invoices=[])
+    invoices = DailyResponse(username=current_user.username, total=0, tax=0, count=0, invoices=[])
     if len(data) != 0:
         total = sum([it.total_value for it in data])
         tax = sum([it.tax_value for it in data])
-        invoices = DailyResponse(count=len(data), total=total, tax=tax, invoices=data)
+        invoices = DailyResponse(username=current_user.username, count=len(data), total=total, tax=tax, invoices=data)
     return invoices
 
 
