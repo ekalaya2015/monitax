@@ -17,7 +17,7 @@ from app.core import config, security
 
 # from app.core.session import async_session
 from app.core.session import SessionLocal
-from app.models.model import Role, User
+from app.models.model import Role, User,Invoice
 
 
 async def main() -> None:
