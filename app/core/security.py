@@ -29,7 +29,9 @@ class JWTTokenPayload(BaseModel):
     exp: int
 
 
-def create_jwt_token(subject: str | int, role:str, username:str, exp_secs: int, refresh: bool):
+def create_jwt_token(
+    subject: str | int, role: str, username: str, exp_secs: int, refresh: bool
+):
     """Creates jwt access or refresh token for user.
 
     Args:
@@ -45,7 +47,7 @@ def create_jwt_token(subject: str | int, role:str, username:str, exp_secs: int, 
         "iat": issued_at,
         "exp": expires_at,
         "sub": subject,
-        "role":role,
+        "role": role,
         "name": username,
         "refresh": refresh,
     }
@@ -57,13 +59,13 @@ def create_jwt_token(subject: str | int, role:str, username:str, exp_secs: int, 
     return encoded_jwt, expires_at, issued_at
 
 
-def generate_access_token_response(subject: str | int,role:str,username:str):
+def generate_access_token_response(subject: str | int, role: str, username: str):
     """Generate tokens and return AccessTokenResponse"""
     access_token, expires_at, issued_at = create_jwt_token(
-        subject, role, username,ACCESS_TOKEN_EXPIRE_SECS, refresh=False
+        subject, role, username, ACCESS_TOKEN_EXPIRE_SECS, refresh=False
     )
     refresh_token, refresh_expires_at, refresh_issued_at = create_jwt_token(
-        subject, role, username,REFRESH_TOKEN_EXPIRE_SECS, refresh=True
+        subject, role, username, REFRESH_TOKEN_EXPIRE_SECS, refresh=True
     )
     return AccessTokenResponse(
         token_type="Bearer",

@@ -31,8 +31,7 @@ async def get_device_list(
 ):
     """Get device list of current user"""
     if current_user.role is not Role.admin:
-        raise HTTPException(status_code=401,detail="Not permissible for this role")
-
+        raise HTTPException(status_code=401, detail="Not permissible for this role")
 
     if status:
         result = await session.exec(
@@ -81,15 +80,17 @@ async def get_device_list(
         )
     return response  # devices
 
-@router.get('/me',response_model=List[DeviceCreatedResponse])
+
+@router.get("/me", response_model=List[DeviceCreatedResponse])
 async def get_devices_owned_by_current_user(
-    current_user:User=Depends(deps.get_current_user),
-    session:AsyncSession=Depends(deps.get_session),    
+    current_user: User = Depends(deps.get_current_user),
+    session: AsyncSession = Depends(deps.get_session),
 ):
     """Get device list owned by current user"""
-    result = await session.exec(select(Device).where(Device.user_id==current_user.id))
+    result = await session.exec(select(Device).where(Device.user_id == current_user.id))
     devices = result.fetchall()
     return [device for device in devices]
+
 
 @router.post("/", response_model=DeviceCreatedResponse)
 async def add_device(
@@ -103,7 +104,7 @@ async def add_device(
     When create/add device, status will be set to Inactive
     """
     if current_user.role is not Role.admin:
-        raise HTTPException(status_code=401,detail="Not permissible for this role")
+        raise HTTPException(status_code=401, detail="Not permissible for this role")
 
     result = await session.exec(select(Device).where(Device.name == new_device.name))
     if result.first():
@@ -150,7 +151,7 @@ async def assign_device_to_user(
     * Attribute 'lon' is longitude coordinate (mandatory)
     """
     if current_user.role is not Role.admin:
-        raise HTTPException(status_code=401,detail="Not permissible for this role")
+        raise HTTPException(status_code=401, detail="Not permissible for this role")
 
     result = await session.exec(select(Device).where(Device.id == device_id))
     device = result.one_or_none()
@@ -202,7 +203,7 @@ async def unassign_device_from_user(
 
     """
     if current_user.role is not Role.admin:
-        raise HTTPException(status_code=401,detail="Not permissible for this role")
+        raise HTTPException(status_code=401, detail="Not permissible for this role")
 
     result = await session.exec(select(Device).where(Device.id == device_id))
     device = result.one_or_none()
@@ -244,7 +245,7 @@ async def update_devices_profile(
     1. Update can be applied to device with any statuses except Inactive
     """
     if current_user.role is not Role.admin:
-        raise HTTPException(status_code=401,detail="Not permissible for this role")
+        raise HTTPException(status_code=401, detail="Not permissible for this role")
 
     result = await session.exec(select(Device).where(Device.id == device_id))
     device = result.one_or_none()
@@ -282,7 +283,7 @@ async def delete_device(
     3. Device does not have any invoices
     """
     if current_user.role is not Role.admin:
-        raise HTTPException(status_code=401,detail="Not permissible for this role")
+        raise HTTPException(status_code=401, detail="Not permissible for this role")
 
     result = await session.exec(select(Device).where(Device.id == id))
     device = result.one_or_none()

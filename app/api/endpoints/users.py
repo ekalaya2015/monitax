@@ -4,7 +4,6 @@ import random
 import string
 from datetime import datetime
 from typing import List
-from dotenv import unset_key
 
 
 import pytz
@@ -89,7 +88,7 @@ async def get_user_by_id(
 ):
     """Get user detail by id"""
     if current_user.role is not Role.admin:
-        raise HTTPException(status_code=401,detail="Not permissible for this role")
+        raise HTTPException(status_code=401, detail="Not permissible for this role")
     result = await session.exec(select(User).where(User.id == id))
     user = result.one_or_none()
     if user is None:
@@ -128,7 +127,7 @@ async def delete_user_by_id(
     1. User does not have device assigned
     """
     if current_user.role is not Role.admin:
-        raise HTTPException(status_code=401,detail="Not permissible for this role")
+        raise HTTPException(status_code=401, detail="Not permissible for this role")
 
     # check whether user has devices assigned
     result = await session.exec(select(User).where(User.id == id))
@@ -178,18 +177,17 @@ async def register_new_user(
 ):
     """Create new user"""
     if current_user.role is not Role.admin:
-        raise HTTPException(status_code=401,detail="Not permissible for this role")
-
+        raise HTTPException(status_code=401, detail="Not permissible for this role")
 
     result = await session.exec(select(User).where(User.username == new_user.username))
     user = result.one_or_none()
-    chars=string.digits
+    chars = string.digits
     if user is not None:
         raise HTTPException(status_code=400, detail="Cannot use this email address")
     try:
         user = User(
             username=new_user.username,
-            nik=''.join(random.choice(chars) for i in range(16)),
+            nik="".join(random.choice(chars) for i in range(16)),
             hashed_password=get_password_hash(new_user.password),
             role=new_user.role,
             created_at=datetime.now(timezone),

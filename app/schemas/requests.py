@@ -21,7 +21,7 @@ class UserUpdateProfileRequest(BaseRequest):
     first_name: Optional[str]
     last_name: Optional[str]
     address: Optional[str]
-    phone_no:Optional[str]
+    phone_no: Optional[str]
 
 
 class UserCreateRequest(BaseRequest):

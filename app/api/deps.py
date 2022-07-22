@@ -14,7 +14,10 @@ from app.core.session import SessionLocal
 from app.models.model import User
 from app.schemas.responses import UserResponse
 
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=config.settings.API_PREFIX+"/auth/access-token")
+reusable_oauth2 = OAuth2PasswordBearer(
+    tokenUrl=config.settings.API_PREFIX + "/auth/access-token"
+)
+
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     async with SessionLocal() as session:
