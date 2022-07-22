@@ -1,7 +1,9 @@
 from datetime import datetime
+from itertools import count
 
 import pytz
 from fastapi import APIRouter, Depends, HTTPException
+import sqlalchemy
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 import random
@@ -9,7 +11,10 @@ from app.api import deps
 from app.core.config import settings
 from app.models.model import Device, Invoice, User
 from app.schemas.requests import InvoiceBaseRequest
-from app.schemas.responses import InvoiceBaseResponse
+from app.schemas.responses import DailyResponse, InvoiceBaseResponse
+import sqlalchemy
+from sqlalchemy import cast, Date, func
+from typing import List
 
 timezone = pytz.timezone(settings.TIMEZONE)
 router = APIRouter()
@@ -65,6 +70,23 @@ async def submit_invoice(
         raise HTTPException(
             status_code=500, detail="Something went wrong. Contact your admin"
         )
+
+@router.get('/daily',response_model=DailyResponse)
+async def get_daily_stats(
+    current_user: User = Depends(deps.get_current_user),
+    session: AsyncSession = Depends(deps.get_session),
+):
+    """Get daily invoice statistics (sales, transactions) from current user"""
+    result = await session.exec(select(Invoice).where(Invoice.username==current_user.username))
+    data = result.fetchall()
+    invoices=DailyResponse(
+        total=0,tax=0,count=0,invoices=[]
+    )
+    if len(data)!=0:
+        total=sum([it.total_value for it in data])
+        tax=sum([it.tax_value for it in data])
+        invoices=DailyResponse(count=len(data),total=total,tax=tax, invoices=data)    
+    return invoices
 
 @router.get("/analytics")
 async def analytics():

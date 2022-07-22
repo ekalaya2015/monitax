@@ -87,3 +87,9 @@ class InvoiceBaseResponse(BaseResponse):
     invoice_date: datetime.datetime
     tax_value: condecimal(max_digits=15, decimal_places=2)
     total_value: condecimal(max_digits=15, decimal_places=2)
+
+class DailyResponse(BaseResponse):
+    total: condecimal(max_digits=15,decimal_places=2)
+    tax: condecimal(max_digits=15,decimal_places=2)
+    count: int
+    invoices: List[InvoiceBaseResponse]
