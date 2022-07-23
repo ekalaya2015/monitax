@@ -92,8 +92,12 @@ async def weekly_statistics(
     session: AsyncSession = Depends(deps.get_session),
 ):
     """Weekly statistics (sales, tax, and transactions"""
-    result=await session.exec(select(cast(Invoice.invoice_date,Date).label('date'),func.sum(Invoice.total_value).label('total'),func.sum(Invoice.tax_value),func.count().label('trx'))
+    weekago = pendulum.now().subtract(days=6)
+    now=pendulum.now()
+    result=await session.exec(select(cast(Invoice.invoice_date,Date).label('date'),func.sum(Invoice.total_value).label('total'),func.sum(Invoice.tax_value).label('tax'),func.count().label('trx'))
     .where(Invoice.username==current_user.username)
+    .where(cast(Invoice.invoice_date,Date)>=cast(weekago.date(),Date))
+    .where(cast(Invoice.invoice_date,Date)<=cast(now.date(),Date))
     .group_by(cast(Invoice.invoice_date,Date))
     .order_by(cast(Invoice.invoice_date,Date)))
     
