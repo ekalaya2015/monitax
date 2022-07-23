@@ -48,8 +48,8 @@ async def main() -> None:
         else:
             print("Superuser already exists in database")
         devices=['Raspigeek001','Raspigeek003']
-        invdate=pendulum.now()
-        for i in range (0,125):
+        invdate=pendulum.now().subtract(days=5)
+        for i in range (0,18):
             randominvnum=app.utils.invnum_generator.invnum_generate()
             invnum=f'INV-{randominvnum}'
             random.shuffle(devices)

@@ -11,7 +11,7 @@ from app.core.config import settings
 from app.models.model import Device, Invoice, User
 from app.schemas.requests import InvoiceBaseRequest
 from app.schemas.responses import DailyResponse, InvoiceBaseResponse
-from sqlalchemy import cast,Date
+from sqlalchemy import cast,Date, func
 
 timezone = pytz.timezone(settings.TIMEZONE)
 router = APIRouter()
@@ -85,6 +85,20 @@ async def get_daily_stats(
         tax = sum([it.tax_value for it in data])
         invoices = DailyResponse(username=current_user.username, count=len(data), total=total, tax=tax, invoices=data)
     return invoices
+
+@router.get('/weekly_stats')
+async def weekly_statistics(
+    current_user: User = Depends(deps.get_current_user),
+    session: AsyncSession = Depends(deps.get_session),
+):
+    """Weekly statistics (sales, tax, and transactions"""
+    result=await session.exec(select(cast(Invoice.invoice_date,Date).label('date'),func.sum(Invoice.total_value).label('total'),func.sum(Invoice.tax_value),func.count().label('trx'))
+    .where(Invoice.username==current_user.username)
+    .group_by(cast(Invoice.invoice_date,Date))
+    .order_by(cast(Invoice.invoice_date,Date)))
+    
+    stats=result.fetchall()
+    return stats
 
 
 @router.get("/analytics")
