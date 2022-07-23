@@ -11,7 +11,7 @@ from app.core.config import settings
 from app.models.model import Device, Invoice, User
 from app.schemas.requests import InvoiceBaseRequest
 from app.schemas.responses import DailyResponse, InvoiceBaseResponse
-from sqlalchemy import cast,Date, func
+from sqlalchemy import cast, Date, func
 
 timezone = pytz.timezone(settings.TIMEZONE)
 router = APIRouter()
@@ -76,15 +76,18 @@ async def get_daily_stats(
 ):
     """Get daily invoice statistics (sales, transactions) from current user"""
     result = await session.exec(
-        select(Invoice.device_name,Invoice.invoice_num,Invoice.invoice_date,Invoice.total_value,Invoice.tax_value).where(Invoice.username == current_user.username).where(cast(Invoice.invoice_date,Date)==cast(pendulum.now().date(),Date)))
-    
+        select(Invoice.device_name, Invoice.invoice_num, Invoice.invoice_date, Invoice.total_value, Invoice.tax_value).where(Invoice.username == current_user.username).where(cast(Invoice.invoice_date, Date) == cast(pendulum.now().date(), Date)))
+
     data = result.fetchall()
-    invoices = DailyResponse(username=current_user.username, total=0, tax=0, count=0, invoices=[])
+    invoices = DailyResponse(
+        username=current_user.username, total=0, tax=0, count=0, invoices=[])
     if len(data) != 0:
         total = sum([it.total_value for it in data])
         tax = sum([it.tax_value for it in data])
-        invoices = DailyResponse(username=current_user.username, count=len(data), total=total, tax=tax, invoices=data)
+        invoices = DailyResponse(username=current_user.username, count=len(
+            data), total=total, tax=tax, invoices=data)
     return invoices
+
 
 @router.get('/weekly_stats')
 async def weekly_statistics(
@@ -93,15 +96,15 @@ async def weekly_statistics(
 ):
     """Weekly statistics (sales, tax, and transactions"""
     weekago = pendulum.now().subtract(days=6)
-    now=pendulum.now()
-    result=await session.exec(select(cast(Invoice.invoice_date,Date).label('date'),func.sum(Invoice.total_value).label('total'),func.sum(Invoice.tax_value).label('tax'),func.count().label('trx'))
-    .where(Invoice.username==current_user.username)
-    .where(cast(Invoice.invoice_date,Date)>=cast(weekago.date(),Date))
-    .where(cast(Invoice.invoice_date,Date)<=cast(now.date(),Date))
-    .group_by(cast(Invoice.invoice_date,Date))
-    .order_by(cast(Invoice.invoice_date,Date)))
-    
-    stats=result.fetchall()
+    now = pendulum.now()
+    result = await session.exec(select(cast(Invoice.invoice_date, Date).label('date'), func.sum(Invoice.total_value).label('total'), func.sum(Invoice.tax_value).label('tax'), func.count().label('trx'))
+                                .where(Invoice.username == current_user.username)
+                                .where(cast(Invoice.invoice_date, Date) >= cast(weekago.date(), Date))
+                                .where(cast(Invoice.invoice_date, Date) <= cast(now.date(), Date))
+                                .group_by(cast(Invoice.invoice_date, Date))
+                                .order_by(cast(Invoice.invoice_date, Date)))
+
+    stats = result.fetchall()
     return stats
 
 
