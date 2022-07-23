@@ -7,6 +7,7 @@ By defualt `main` create a superuser if not exists
 
 import asyncio
 from datetime import datetime
+from decimal import Decimal
 import random
 import string
 import uuid
@@ -48,11 +49,11 @@ async def main() -> None:
             print("Superuser already exists in database")
         devices=['Raspigeek001','Raspigeek003']
         invdate=pendulum.now()
-        for i in range (0,100):
+        for i in range (0,20):
             invnum=str(uuid.uuid4())
             random.shuffle(devices)
-            total_value=random.randint(100,999)*100
-            tax_value=total_value*11/111
+            total_value:float=random.randint(100,999)*100.0
+            tax_value:float=round(total_value*11.0/111.0,2)            
             invdate=invdate.add(minutes=10)
             inv=Invoice(id=str(uuid.uuid4()),invoice_num=invnum,invoice_date=invdate.to_iso8601_string(),device_name=devices[0],username='ekalaya2015@gmail.com',total_value=total_value,tax_value=tax_value,created_at=pendulum.now().to_iso8601_string(),modified_at=pendulum.now().to_iso8601_string())
             session.add(inv)
