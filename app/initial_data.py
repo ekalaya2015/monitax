@@ -13,7 +13,7 @@ import string
 import uuid
 import pendulum
 from sqlalchemy import select
-
+import app.utils.invnum_generator
 from app.core import config, security
 
 # from app.core.session import async_session
@@ -49,8 +49,9 @@ async def main() -> None:
             print("Superuser already exists in database")
         devices=['Raspigeek001','Raspigeek003']
         invdate=pendulum.now()
-        for i in range (0,20):
-            invnum=str(uuid.uuid4())
+        for i in range (0,125):
+            randominvnum=app.utils.invnum_generator.invnum_generate()
+            invnum=f'INV-{randominvnum}'
             random.shuffle(devices)
             total_value:float=random.randint(100,999)*100.0
             tax_value:float=round(total_value*11.0/111.0,2)            
