@@ -80,7 +80,7 @@ async def get_daily_stats(
 
     data = result.fetchall()
     invoices = DailyResponse(
-        username=current_user.username, total=0, tax=0, count=0, invoices=[])
+        username=current_user.username, total=0.0, tax=0.0, count=0, invoices=[])
     if len(data) != 0:
         total = sum([it.total_value for it in data])
         tax = sum([it.tax_value for it in data])
