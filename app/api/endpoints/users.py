@@ -184,11 +184,12 @@ async def forgot_password(
     session: AsyncSession = Depends(deps.get_session),
 ):
     """Create new password in case user forgot his/her password"""
+    
+    result = await session.exec(select(User).where(User.username == user.username))
+    user = result.one_or_none()
+    if user is None:
+        raise HTTPException(status_code=400,detail='User is not registered')
     try:
-        result = await session.exec(select(User).where(User.username == user.username))
-        user = result.one_or_none()
-        if user is None:
-            raise HTTPException(status_code=400,detail='User is not registered')
         new_password = generate_random_password(length=12)
         hashed_password = get_password_hash(new_password)
         setattr(user, 'hashed_password', hashed_password)
@@ -200,7 +201,6 @@ async def forgot_password(
                 send_reset_password_email(
                     user.username, new_password=new_password)
             )
-
         return user
     except Exception:
         await session.rollback()
