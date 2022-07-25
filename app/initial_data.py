@@ -38,6 +38,7 @@ async def main() -> None:
                 ),
                 nik="".join(random.choice(chars) for i in range(16)),
                 role=Role.admin,
+                verified=True,
                 created_at=datetime.now(),
                 modified_at=datetime.now(),
                 first_name="Administrator",
