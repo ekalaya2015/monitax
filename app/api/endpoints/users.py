@@ -220,7 +220,7 @@ async def register_new_user(
         raise HTTPException(status_code=500, detail=json.dumps(str(e)))
 
 
-@router.post('/confirm/{token}',response_class=HTMLResponse)
+@router.get('/confirm/{token}',response_class=HTMLResponse)
 async def email_confirmation(
     token:str,
     session: AsyncSession = Depends(deps.get_session),
