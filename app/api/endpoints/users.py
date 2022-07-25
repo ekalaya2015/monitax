@@ -248,7 +248,7 @@ async def register_new_user(
                 send_new_account_email(
                     email_to=new_user.username,
                     username=new_user.username,
-                    password=new_user.password,
+                    password='',
                     link=link
                 )
             )
