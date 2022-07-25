@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     TIMEZONE: str
     SERVER_HOST: str = ""
     SECRET_KEY: str
+    SECURITY_PASSWORD_SALT:str=""
     API_PREFIX: str = "/api/v1"
     ENVIRONMENT: Literal["DEV", "PYTEST", "STG", "PRD"] = "DEV"
     SECURITY_BCRYPT_ROUNDS: int = 12
@@ -83,7 +84,7 @@ class Settings(BaseSettings):
         return v
 
     EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
-    EMAIL_TEMPLATES_DIR: str = "/app/email-templates/build"
+    EMAIL_TEMPLATES_DIR: str = "/home/ridwan/workspace/monitax/backend/app/email-templates/target"
     EMAILS_ENABLED: bool = False
 
     @validator("EMAILS_ENABLED", pre=True)

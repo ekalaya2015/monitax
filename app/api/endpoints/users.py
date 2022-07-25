@@ -1,3 +1,4 @@
+from http.client import HTTPResponse
 import json
 import uuid
 import random
@@ -20,8 +21,10 @@ from app.schemas.requests import (
     UserUpdatePasswordRequest,
     UserUpdateProfileRequest,
 )
-from app.schemas.responses import BaseUserResponse, UserDeviceInResponse, UserResponse
+from app.schemas.responses import BaseUserResponse, UserConfirmationResponse, UserDeviceInResponse, UserResponse
 from app.core.utils import send_new_account_email
+from app.core.utils import generate_confirmation_token,confirm_token
+from fastapi.responses import HTMLResponse
 
 router = APIRouter()
 timezone = pytz.timezone(settings.TIMEZONE)
@@ -47,6 +50,7 @@ async def read_current_user(
             address=current_user.address,
             phone_no=current_user.phone_no,
             role=current_user.role,
+            verified=current_user.verified,
             devices=devices,
         )
         return response
@@ -172,12 +176,12 @@ async def reset_current_user_password(
 @router.post("/register", response_model=BaseUserResponse)
 async def register_new_user(
     new_user: UserCreateRequest,
-    current_user: User = Depends(deps.get_current_user),
+    # current_user: User = Depends(deps.get_current_user),
     session: AsyncSession = Depends(deps.get_session),
 ):
     """Create new user"""
-    if current_user.role is not Role.admin:
-        raise HTTPException(status_code=401, detail="Not permissible for this role")
+    # if current_user.role is not Role.admin:
+    #     raise HTTPException(status_code=401, detail="Not permissible for this role")
 
     result = await session.exec(select(User).where(User.username == new_user.username))
     user = result.one_or_none()
@@ -187,14 +191,18 @@ async def register_new_user(
     try:
         user = User(
             username=new_user.username,
-            nik="".join(random.choice(chars) for i in range(16)),
+            nik=new_user.nik, #"".join(random.choice(chars) for i in range(16)),
             hashed_password=get_password_hash(new_user.password),
-            role=new_user.role,
+            role=Role.merchant, #new_user.role,
+            phone_no=new_user.phone_no,
+            verified=False,
             created_at=datetime.now(timezone),
             modified_at=datetime.now(timezone),
         )
         session.add(user)
         await session.commit()
+        token=generate_confirmation_token(user.username)
+        print(token)
         if settings.EMAILS_ENABLED:
             task = BackgroundTasks()
             task.add_task(
@@ -209,6 +217,43 @@ async def register_new_user(
         await session.rollback()
         raise HTTPException(status_code=500, detail=json.dumps(str(e)))
 
+
+@router.post('/confirm/{token}',response_class=HTMLResponse)
+async def email_confirmation(
+    token:str,
+    session: AsyncSession = Depends(deps.get_session),
+):
+    """Email confirmation to verify user"""    
+    try:
+        email=confirm_token(token)
+        result=await session.exec(select(User).where(User.username==email))
+        user=result.one_or_none()
+        setattr(user,'verified',True)
+        session.add(user)
+        await session.commit()
+        return """
+        <html>
+            <head>
+                <title>Email Confirmation Success</title>
+            </head>
+            <body>
+                <h3>Selamat registrasi akun Anda berhasil!!</h3>
+                <p>Silakan login di aplikasi Monitax</p>
+            </body>
+        </html>
+        """
+    except Exception:
+        return """
+        <html>
+            <head>
+                <title>Email Confirmation Failed</title>
+            </head>
+            <body>
+                <h3>Email tidak berhasil dikonfirmasi!</h3>
+                <p>Silakan cek kembali alamat email anda</p>
+            </body>
+        </html>
+        """
 
 @router.get("/", response_model=List[BaseUserResponse])
 async def get_user_list(

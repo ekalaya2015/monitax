@@ -22,6 +22,7 @@ class AccessTokenResponse(BaseResponse):
 class UserResponse(BaseResponse):
     id: uuid.UUID
     username: EmailStr
+    verified:Optional[bool]
     nik: Optional[str]
     first_name: Optional[str]
     last_name: Optional[str]
@@ -29,11 +30,19 @@ class UserResponse(BaseResponse):
     phone_no: Optional[str]
     role: Role
 
+class UserConfirmationResponse(BaseResponse):
+    id: uuid.UUID
+    username: EmailStr
+    verified:bool
+
 
 class BaseUserResponse(BaseResponse):
     id: uuid.UUID
     username: EmailStr
     role: Role
+    verified: bool
+    nik:str
+    phone_no:str
 
 
 class UserDeviceResponse(BaseResponse):

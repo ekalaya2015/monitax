@@ -15,7 +15,7 @@ import pendulum
 from sqlalchemy import select
 import app.utils.invnum_generator
 from app.core import config, security
-
+from app.core.utils import generate_random_password
 # from app.core.session import async_session
 from app.core.session import SessionLocal
 from app.models.model import Role, User, Invoice
@@ -49,16 +49,16 @@ async def main() -> None:
         else:
             print("Superuser already exists in database")
         devices = ['Raspigeek001', 'Raspigeek003']
-        invdate = pendulum.now().subtract(days=5)
-        for i in range(0, 18):
-            randominvnum = app.utils.invnum_generator.invnum_generate()
+        invdate = pendulum.now()
+        for i in range(0, 3):
+            randominvnum = generate_random_password()
             invnum = f'INV-{randominvnum}'
             random.shuffle(devices)
             total_value: float = random.randint(100, 999)*100.0
             tax_value: float = round(total_value*11.0/111.0, 2)
             invdate = invdate.add(minutes=10)
             inv = Invoice(id=str(uuid.uuid4()), invoice_num=invnum, invoice_date=invdate.to_iso8601_string(
-            ), device_name=devices[0], username='ekalaya2015@gmail.com', total_value=total_value, tax_value=tax_value, created_at=pendulum.now().to_iso8601_string(), modified_at=pendulum.now().to_iso8601_string())
+            ), device_name=devices[0], username='ekalaya2015@gmail.com', total_value=total_value, tax_value=tax_value, created_at=pendulum.now().to_datetime_string(), modified_at=pendulum.now().to_datetime_string())
             session.add(inv)
             await session.commit()
         print("Initial data created")

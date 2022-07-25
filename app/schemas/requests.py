@@ -27,7 +27,9 @@ class UserUpdateProfileRequest(BaseRequest):
 class UserCreateRequest(BaseRequest):
     username: EmailStr
     password: str
-    role: Role = Role.merchant
+    nik:str
+    phone_no:str
+    #role: Role = Role.merchant
 
 
 class DeviceCreateRequest(BaseRequest):

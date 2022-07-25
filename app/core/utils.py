@@ -5,17 +5,13 @@ import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, Optional
-
+from itsdangerous import URLSafeTimedSerializer
 import emails
 from emails.template import JinjaTemplate
 from jose import jwt
 
 from app.core.config import settings
-
-
 characters = list(string.ascii_letters + string.digits)
-
-
 def generate_random_password():
     length = 10
     random.shuffle(characters)
@@ -24,6 +20,22 @@ def generate_random_password():
         password.append(random.choice(characters))
     random.shuffle(password)
     return "".join(password)
+    
+def generate_confirmation_token(email):
+    serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
+    return serializer.dumps(email, salt=settings.SECURITY_PASSWORD_SALT)
+
+def confirm_token(token, expiration=3600):
+    serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
+    try:
+        email = serializer.loads(
+            token,
+            salt=settings.SECURITY_PASSWORD_SALT,
+            max_age=expiration
+        )
+    except:
+        return False
+    return email
 
 
 def send_email(
