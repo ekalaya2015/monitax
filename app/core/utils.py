@@ -12,8 +12,8 @@ from jose import jwt
 
 from app.core.config import settings
 characters = list(string.ascii_letters + string.digits)
-def generate_random_password():
-    length = 10
+def generate_random_password(length:Optional[int]):
+    len = length|8
     random.shuffle(characters)
     password = []
     for i in range(length):
@@ -74,23 +74,20 @@ def send_test_email(email_to: str) -> None:
     )
 
 
-def send_reset_password_email(email_to: str, email: str, token: str) -> None:
+def send_reset_password_email(email_to: str, new_password:str) -> None:
     project_name = settings.PROJECT_NAME
-    subject = f"{project_name} - Password recovery for user {email}"
+    subject = f"{project_name} - Password recovery for user {email_to}"
     with open(Path(settings.EMAIL_TEMPLATES_DIR) / "reset_password.html") as f:
         template_str = f.read()
-    server_host = settings.SERVER_HOST
-    link = f"{server_host}/reset-password?token={token}"
+
     send_email(
         email_to=email_to,
         subject_template=subject,
         html_template=template_str,
         environment={
             "project_name": settings.PROJECT_NAME,
-            "username": email,
-            "email": email_to,
-            "valid_hours": settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS,
-            "link": link,
+            "username": email_to,
+            "new_password":new_password
         },
     )
 

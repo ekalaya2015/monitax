@@ -18,12 +18,13 @@ from app.core.security import get_password_hash
 from app.models.model import Device, User
 from app.schemas.requests import (
     UserCreateRequest,
+    UserForgotPasswordRequest,
     UserUpdatePasswordRequest,
     UserUpdateProfileRequest,
 )
 from app.schemas.responses import BaseUserResponse, UserConfirmationResponse, UserDeviceInResponse, UserResponse
-from app.core.utils import send_new_account_email
-from app.core.utils import generate_confirmation_token,confirm_token
+from app.core.utils import generate_random_password, send_new_account_email, send_reset_password_email
+from app.core.utils import generate_confirmation_token, confirm_token
 from fastapi.responses import HTMLResponse
 
 router = APIRouter()
@@ -92,11 +93,13 @@ async def get_user_by_id(
 ):
     """Get user detail by id"""
     if current_user.role is not Role.admin:
-        raise HTTPException(status_code=401, detail="Not permissible for this role")
+        raise HTTPException(
+            status_code=401, detail="Not permissible for this role")
     result = await session.exec(select(User).where(User.id == id))
     user = result.one_or_none()
     if user is None:
-        raise HTTPException(status_code=400, detail=f"User with id {id} not found")
+        raise HTTPException(
+            status_code=400, detail=f"User with id {id} not found")
     try:
         result = await session.exec(select(Device).where(Device.user_id == id))
         devices = result.fetchall()
@@ -131,7 +134,8 @@ async def delete_user_by_id(
     1. User does not have device assigned
     """
     if current_user.role is not Role.admin:
-        raise HTTPException(status_code=401, detail="Not permissible for this role")
+        raise HTTPException(
+            status_code=401, detail="Not permissible for this role")
 
     # check whether user has devices assigned
     result = await session.exec(select(User).where(User.id == id))
@@ -161,11 +165,43 @@ async def reset_current_user_password(
 ):
     """Update current user password"""
     try:
-        current_user.hashed_password = get_password_hash(user_update_password.password)
+        current_user.hashed_password = get_password_hash(
+            user_update_password.password)
         current_user.modified_at = datetime.now(timezone)
         session.add(current_user)
         await session.commit()
         return current_user
+    except Exception:
+        await session.rollback()
+        raise HTTPException(
+            status_code=500, detail="Something went wrong. rollback has occured"
+        )
+
+
+@router.post("/forgot-password", response_model=BaseUserResponse)
+async def forgot_password(
+    user: UserForgotPasswordRequest,
+    session: AsyncSession = Depends(deps.get_session),
+):
+    """Create new password in case user forgot his/her password"""
+    try:
+        result = await session.exec(select(User).where(User.username == user.username))
+        user = result.one_or_none()
+        if user is None:
+            raise HTTPException(status_code=400,detail='User is not registered')
+        new_password = generate_random_password(length=12)
+        hashed_password = get_password_hash(new_password)
+        setattr(user, 'hashed_password', hashed_password)
+        session.add(user)
+        await session.commit()
+        if settings.EMAILS_ENABLED:
+            task = BackgroundTasks()
+            task.add_task(
+                send_reset_password_email(
+                    user.username, new_password=new_password)
+            )
+
+        return user
     except Exception:
         await session.rollback()
         raise HTTPException(
@@ -187,13 +223,15 @@ async def register_new_user(
     user = result.one_or_none()
     chars = string.digits
     if user is not None:
-        raise HTTPException(status_code=400, detail="Cannot use this email address")
+        raise HTTPException(
+            status_code=400, detail="Cannot use this email address")
     try:
         user = User(
             username=new_user.username,
-            nik=new_user.nik, #"".join(random.choice(chars) for i in range(16)),
+            # "".join(random.choice(chars) for i in range(16)),
+            nik=new_user.nik,
             hashed_password=get_password_hash(new_user.password),
-            role=Role.merchant, #new_user.role,
+            role=Role.merchant,  # new_user.role,
             phone_no=new_user.phone_no,
             verified=False,
             created_at=datetime.now(timezone),
@@ -201,8 +239,8 @@ async def register_new_user(
         )
         session.add(user)
         await session.commit()
-        token=generate_confirmation_token(user.username)
-        link=f'https://raspi-geek.tech/api/v1/users/confirm/{token}'        
+        token = generate_confirmation_token(user.username)
+        link = f'https://raspi-geek.tech/api/v1/users/confirm/{token}'
         print(token)
         if settings.EMAILS_ENABLED:
             task = BackgroundTasks()
@@ -220,17 +258,17 @@ async def register_new_user(
         raise HTTPException(status_code=500, detail=json.dumps(str(e)))
 
 
-@router.get('/confirm/{token}',response_class=HTMLResponse)
+@router.get('/confirm/{token}', response_class=HTMLResponse)
 async def email_confirmation(
-    token:str,
+    token: str,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    """Email confirmation to verify user"""    
+    """Email confirmation to verify user"""
     try:
-        email=confirm_token(token)
-        result=await session.exec(select(User).where(User.username==email))
-        user=result.one_or_none()
-        setattr(user,'verified',True)
+        email = confirm_token(token)
+        result = await session.exec(select(User).where(User.username == email))
+        user = result.one_or_none()
+        setattr(user, 'verified', True)
         session.add(user)
         await session.commit()
         return """
@@ -256,6 +294,7 @@ async def email_confirmation(
             </body>
         </html>
         """
+
 
 @router.get("/", response_model=List[BaseUserResponse])
 async def get_user_list(

@@ -15,6 +15,9 @@ class RefreshTokenRequest(BaseRequest):
 class UserUpdatePasswordRequest(BaseRequest):
     password: str
 
+class UserForgotPasswordRequest(BaseRequest):
+    username: str
+
 
 class UserUpdateProfileRequest(BaseRequest):
     nik: Optional[str]
