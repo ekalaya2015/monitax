@@ -271,7 +271,9 @@ async def email_confirmation(
         setattr(user, 'verified', True)
         session.add(user)
         await session.commit()
-        return HTMLResponse('/app/app/static/welcome.html')
+        with open('/app/app/static/welcome.html') as f:
+            data=f.read()
+        return HTMLResponse(content=data)
     except Exception:
         return """
         <html>
