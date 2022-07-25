@@ -258,7 +258,7 @@ async def register_new_user(
         raise HTTPException(status_code=500, detail=json.dumps(str(e)))
 
 
-@router.get('/confirm/{token}', response_class=HTMLResponse)
+@router.get('/confirm/{token}', response_class=HTMLResponse, include_in_schema=False)
 async def email_confirmation(
     token: str,
     session: AsyncSession = Depends(deps.get_session),
@@ -271,17 +271,7 @@ async def email_confirmation(
         setattr(user, 'verified', True)
         session.add(user)
         await session.commit()
-        return """
-        <html>
-            <head>
-                <title>Email Confirmation Success</title>
-            </head>
-            <body>
-                <h3>Selamat registrasi akun Anda berhasil!!</h3>
-                <p>Silakan login di aplikasi Monitax</p>
-            </body>
-        </html>
-        """
+        return HTMLResponse('/app/app/static/welcome.html')
     except Exception:
         return """
         <html>
