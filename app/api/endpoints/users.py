@@ -202,6 +202,7 @@ async def register_new_user(
         session.add(user)
         await session.commit()
         token=generate_confirmation_token(user.username)
+        link=f'https://raspi-geek.tech/api/v1/users/confirm/{token}'        
         print(token)
         if settings.EMAILS_ENABLED:
             task = BackgroundTasks()
@@ -210,6 +211,7 @@ async def register_new_user(
                     email_to=new_user.username,
                     username=new_user.username,
                     password=new_user.password,
+                    link=link
                 )
             )
         return user

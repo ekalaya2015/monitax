@@ -20,7 +20,7 @@ def generate_random_password():
         password.append(random.choice(characters))
     random.shuffle(password)
     return "".join(password)
-    
+
 def generate_confirmation_token(email):
     serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
     return serializer.dumps(email, salt=settings.SECURITY_PASSWORD_SALT)
@@ -95,12 +95,12 @@ def send_reset_password_email(email_to: str, email: str, token: str) -> None:
     )
 
 
-def send_new_account_email(email_to: str, username: str, password: str) -> None:
+def send_new_account_email(email_to: str, username: str, password: str,link:str) -> None:
     project_name = settings.PROJECT_NAME
     subject = f"{project_name} - New account for user {username}"
     with open(Path(settings.EMAIL_TEMPLATES_DIR) / "new_account.html") as f:
         template_str = f.read()
-    link = settings.SERVER_HOST
+    # link = settings.SERVER_HOST
     send_email(
         email_to=email_to,
         subject_template=subject,
